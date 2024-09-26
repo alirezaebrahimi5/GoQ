@@ -1,4 +1,3 @@
-
 ```markdown
 # GoQ - Distributed Task Queue System
 
@@ -13,7 +12,7 @@ GoQ is a distributed task queue system implemented in Go with support for Redis.
 
 ## Installation
 
-First, make sure you have [Go](https://golang.org/dl/) installed, and Redis running on your machine.
+First, make sure you have [Go](https://golang.org/dl/) installed and Redis running on your machine.
 
 ```bash
 go get github.com/alireza/GoQ
@@ -24,6 +23,25 @@ Next, import the package in your project:
 ```go
 import "github.com/alireza/GoQ/pkg/task"
 import "github.com/alireza/GoQ/pkg/workers"
+```
+
+## Configuration
+
+Create a `config.yaml` file in the root directory of the project to configure the Redis connection and define your task queues:
+
+```yaml
+# config.yaml
+
+redis:
+  addr: "localhost:6379"   # Redis server address
+  password: ""             # Redis password (leave empty if not used)
+  db: 0                    # Redis database number
+
+tasks:
+  - queue_name: "task_queue_1" 
+    scheduled_tasks_set: "scheduled_tasks_1"
+  - queue_name: "task_queue_2" 
+    scheduled_tasks_set: "scheduled_tasks_2"
 ```
 
 ## Usage
@@ -52,7 +70,7 @@ newTask := task.Task{
     Retry: 3,
 }
 
-err := task.PushTask("task_queue", newTask)
+err := task.PushTask("task_queue_1", newTask) // Use the appropriate queue name
 if err != nil {
     log.Println("Error adding task:", err)
 }
@@ -70,8 +88,11 @@ func processTask(t task.Task) error {
 }
 
 func main() {
-    // Start a worker that processes tasks from the "task_queue"
-    go workers.Worker("task_queue", processTask)
+    // Start a worker that processes tasks from "task_queue_1"
+    go workers.Worker("task_queue_1", processTask)
+
+    // Start a worker that processes tasks from "task_queue_2"
+    go workers.Worker("task_queue_2", processTask)
 
     // Keep the main function alive
     select {}
@@ -104,18 +125,6 @@ func ProcessScheduledTasks() {
 }
 ```
 
-## Configuration
-
-By default, Redis is configured to run on `localhost:6379`. If you need to change the Redis server address or add authentication, you can modify the Redis client initialization in `task.go`.
-
-```go
-client := redis.NewClient(&redis.Options{
-    Addr: "localhost:6379",
-    // Password: "", // Set password if required
-    DB:       0,    // Use default DB
-})
-```
-
 ## Example Application
 
 ```go
@@ -136,16 +145,17 @@ func main() {
     }
 
     // Start workers to process tasks
-    go workers.Worker("task_queue", processTask)
+    go workers.Worker("task_queue_1", processTask)
+    go workers.Worker("task_queue_2", processTask)
 
-    // Add a task to the queue
+    // Add a task to the first queue
     newTask := task.Task{
         ID:    "12345",
         Name:  "ExampleTask",
         Retry: 3,
     }
 
-    err := task.PushTask("task_queue", newTask)
+    err := task.PushTask("task_queue_1", newTask)
     if err != nil {
         log.Println("Error adding task:", err)
     }
@@ -182,13 +192,10 @@ Feel free to open issues and submit pull requests to improve GoQ! Contributions 
 Happy coding! 🚀
 ```
 
-### Key Points in the `README.md`:
+### Key Updates
 
-1. **Installation**: Instructions to install the package using `go get`.
-2. **Usage**: Step-by-step guide for adding tasks, running workers, and scheduling tasks.
-3. **Example Application**: A simple example to demonstrate how to use the task queue in a real-world scenario.
-4. **Redis Dependency**: Information on the requirement for Redis and how to quickly set it up.
-5. **Configuration**: Brief information on how to configure the Redis client if needed.
-6. **License and Contribution**: Licensing information and a call for contributions.
+1. **Configuration Section**: Added a new section to specify how to set up the `config.yaml` file for multiple task queues and Redis connection settings.
+2. **Usage Examples**: Updated examples to show how to push tasks to different queues based on the configuration.
+3. **Worker Management**: Included how to start multiple workers for processing tasks from different queues.
 
-This document will serve as a guide for developers using your task queue package in their projects.
+This updated document should guide users on how to utilize your task queue system effectively while configuring multiple task queues. Let me know if you need further adjustments!
