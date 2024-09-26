@@ -15,14 +15,14 @@ GoQ is a distributed task queue system implemented in Go with support for Redis.
 First, make sure you have [Go](https://golang.org/dl/) installed and Redis running on your machine.
 
 ```bash
-go get github.com/alireza/GoQ
+go get github.com/alirezaebrahimi5/GoQ
 ```
 
 Next, import the package in your project:
 
 ```go
-import "github.com/alireza/GoQ/pkg/task"
-import "github.com/alireza/GoQ/pkg/workers"
+import "github.com/alirezaebrahimi5/GoQ/pkg/task"
+import "github.com/alirezaebrahimi5/GoQ/pkg/workers"
 ```
 
 ## Configuration
