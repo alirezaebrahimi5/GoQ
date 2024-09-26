@@ -1,0 +1,10 @@
+redis:
+  addr: "localhost:6379"   # Redis server address
+  password: ""             # Redis password (leave empty if not used)
+  db: 0                    # Redis database number
+
+tasks:
+  - queue_name: "task_queue_1"
+    scheduled_tasks_set: "scheduled_tasks_1"
+  - queue_name: "task_queue_2"
+    scheduled_tasks_set: "scheduled_tasks_2"

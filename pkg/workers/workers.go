@@ -1,26 +1,21 @@
 package workers
 
-import "log"
+import (
+	"GoQ/pkg/task"
+	"log"
+)
 
-func Worker(queueName string) {
+func Worker(queueName string, process func(task.Task) error) {
 	for {
-		task, err := PopTask(queueName)
+		t, err := task.PopTask(queueName)
 		if err != nil {
 			log.Println("Failed to pop task:", err)
 			continue
 		}
 
-		// Process the task
-		err = ProcessTask(task)
+		err = process(t)
 		if err != nil {
-			log.Println("Task failed:", err)
-			// Optionally requeue or retry task
+			log.Println("Task processing failed:", err)
 		}
 	}
-}
-
-func ProcessTask(task Task) error {
-	// Define how to handle each task
-	// Example: Call an API or process a file
-	return nil
 }
