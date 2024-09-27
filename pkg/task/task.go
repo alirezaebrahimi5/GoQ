@@ -1,8 +1,10 @@
 package task
 
 import (
-	"GoQ/pkg/config" // Import the config package
+	"GoQ/pkg/config"
+	"encoding/json"
 	"github.com/go-redis/redis"
+	"log"
 	"time"
 )
 
@@ -17,14 +19,20 @@ func InitRedis(cfg *config.Config) {
 }
 
 type Task struct {
-	ID      string
-	Name    string
-	Payload interface{}
-	Retry   int
+	ID      string      `json:"id"`
+	Name    string      `json:"name"`
+	Payload interface{} `json:"payload"`
+	Retry   int         `json:"retry"`
 }
 
 func PushTask(queueName string, task Task) error {
-	_, err := client.LPush(queueName, task).Result()
+	// Serialize the task to JSON
+	data, err := json.Marshal(task)
+	if err != nil {
+		log.Println("Error marshaling task:", err)
+		return err
+	}
+	_, err = client.LPush(queueName, data).Result()
 	return err
 }
 
@@ -35,13 +43,24 @@ func PopTask(queueName string) (Task, error) {
 	}
 
 	var task Task
-	// Deserialize the task here (you might need to use json.Unmarshal based on how you store tasks)
-	task.ID = result[1] // Adjust according to how you store tasks
+	// Deserialize the task from JSON
+	err = json.Unmarshal([]byte(result[1]), &task)
+	if err != nil {
+		log.Println("Error unmarshaling task:", err)
+		return Task{}, err
+	}
+	task.ID = result[1] // Set the ID to the popped task identifier (if needed)
 	return task, nil
 }
 
 func ScheduleTask(queueName string, task Task, delay time.Duration) error {
+	// Serialize the task to JSON
+	data, err := json.Marshal(task)
+	if err != nil {
+		log.Println("Error marshaling task for scheduling:", err)
+		return err
+	}
 	score := time.Now().Add(delay).Unix()
-	err := client.ZAdd(queueName+"-scheduled", redis.Z{Score: float64(score), Member: task}).Err() // Append '-scheduled' to differentiate
+	err = client.ZAdd(queueName+"-scheduled", redis.Z{Score: float64(score), Member: data}).Err() // Append '-scheduled' to differentiate
 	return err
 }
