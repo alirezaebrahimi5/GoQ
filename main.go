@@ -32,6 +32,7 @@ func main() {
 	// Start workers for each queue defined in the configuration
 	for _, taskConfig := range cfg.Tasks {
 		go workers.Worker(taskConfig.QueueName, processTask)
+		go workers.ScheduledWorker(taskConfig.QueueName) // Start scheduled task worker
 	}
 
 	// Example of adding tasks to the queues
