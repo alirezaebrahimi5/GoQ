@@ -9,7 +9,13 @@ import (
 )
 
 func processTask(t task.Task) error {
+	// Simulate task processing time
 	log.Println("Processing task:", t.Name)
+	time.Sleep(5 * time.Second) // Delay for 5 seconds to simulate work
+	log.Println("Completed task:", t.Name)
+
+	// Remove the task from the Redis queue after processing
+	// (Assuming your PopTask function returns the task ID for removal)
 	return nil
 }
 
